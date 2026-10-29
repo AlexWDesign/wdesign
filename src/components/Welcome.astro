@@ -1,0 +1,74 @@
+---
+/*
+ * "Every brand, big or small is welcome." (Figma 37:5305–5307)
+ * Words start greyed out (black at 10%) and fill with navy one by one as you
+ * scroll. Once all are filled, "is welcome." keeps drifting slightly right.
+ */
+---
+
+<section class="welcome" data-welcome>
+	<h2 class="welcome__text t-display-xl">
+		<span class="welcome__line" data-welcome-line>Every brand, big or small</span>
+		<span class="welcome__line" data-welcome-line data-welcome-drift>is welcome.</span>
+	</h2>
+</section>
+
+<style>
+	.welcome {
+		padding: 172px var(--page-gutter) 0;
+		overflow: hidden;
+	}
+
+	.welcome__text {
+		color: rgb(0 0 0 / 0.1);
+	}
+
+	.welcome__line {
+		display: block;
+		width: max-content;
+	}
+</style>
+
+<script>
+	import { gsap, SplitText, fontsReady, reducedMotion } from '../scripts/motion';
+
+	const section = document.querySelector<HTMLElement>('[data-welcome]');
+
+	if (section) {
+		fontsReady().then(() => {
+			const lines = gsap.utils.toArray<HTMLElement>('[data-welcome-line]', section);
+			const words = lines.flatMap((line) => SplitText.create(line, { type: 'words' }).words);
+			const drift = section.querySelector<HTMLElement>('[data-welcome-drift]');
+
+			if (reducedMotion) {
+				gsap.set(words, { color: '#0a3254' });
+				return;
+			}
+
+			gsap.to(words, {
+				color: '#0a3254',
+				ease: 'none',
+				stagger: 0.5,
+				scrollTrigger: {
+					trigger: section,
+					start: 'top 60%',
+					end: 'bottom 55%',
+					scrub: 0.5,
+				},
+			});
+
+			if (drift) {
+				gsap.to(drift, {
+					x: 90,
+					ease: 'none',
+					scrollTrigger: {
+						trigger: section,
+						start: 'bottom 55%',
+						end: 'bottom top',
+						scrub: 0.5,
+					},
+				});
+			}
+		});
+	}
+</script>

@@ -26,6 +26,8 @@ const Arrow = mode === 'dark' ? ArrowWhite : ArrowInk;
 		display: block;
 		padding: 4px 8px;
 		white-space: nowrap;
+		/* Stays hoverable inside containers that pass the pointer through (e.g. the nav over the hero) */
+		pointer-events: auto;
 	}
 
 	.nav-link--light {

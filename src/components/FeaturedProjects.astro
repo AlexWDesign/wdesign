@@ -1,0 +1,191 @@
+---
+import { Picture } from 'astro:assets';
+import ArrowLink from './ArrowLink.astro';
+import ProjectCaption from './ProjectCaption.astro';
+import greenPrairie from '../assets/projects/green-prairie.jpg';
+import civic from '../assets/projects/civic.jpg';
+import maverick from '../assets/projects/maverick.jpg';
+
+// `position` reproduces each crop from Figma; `drift` is the parallax direction.
+// Thumbnails aren't links yet; wrap `.project__frame` in <a> once project pages exist.
+const projects = [
+	{
+		name: 'Green Prairie',
+		description: 'Eco-friendly line of premium pet products that support sustainable future.',
+		image: greenPrairie,
+		alt: 'Green Prairie Rice Fresh and Hemp Fresh pet food bags',
+		position: '57.5% 50%',
+		drift: 'up',
+	},
+	{
+		name: 'CIVIC Credit Union',
+		description: 'Connecting CIVIC with their community through visual storytelling.',
+		image: civic,
+		alt: 'CIVIC Credit Union report cover reading People first, Purpose driven, Prosperity for all',
+		position: '50% 50%',
+		drift: 'down',
+	},
+	{
+		name: 'Maverick',
+		description: 'Reimagining rental living for the modern maverick.',
+		image: maverick,
+		alt: 'Maverick rental brand shown on a printed brochure and mobile screens',
+		position: '39.4% 50%',
+		drift: 'up',
+	},
+];
+
+const video = {
+	name: 'Nord Quantique',
+	description: 'Making quantum computing approachable through motion and storytelling.',
+	src: '/project-thumbnails/nord-quantique-explainer.mp4',
+};
+---
+
+<section class="featured" aria-labelledby="featured-title">
+	<header class="featured__header">
+		<h2 id="featured-title" class="featured__title t-h1" data-rise>Featured Projects</h2>
+		<p class="featured__intro t-body-m" data-fade>
+			The above phrase communicates the convenience of a one-stop shop while leaving room for graphic design,
+			branding, website development, and future creative services.
+		</p>
+	</header>
+
+	<div class="featured__grid" data-reveal-group>
+		{projects.map((project, i) => (
+			<article class:list={['project', { 'project--edge': i === 0 }]}>
+				<div class="project__frame parallax" data-reveal data-cursor-label={project.name}>
+					<Picture
+						src={project.image}
+						formats={['avif', 'webp']}
+						widths={[480, 960]}
+						sizes="(min-width: 1366px) 34vw, 455px"
+						alt={project.alt}
+						style={`object-position: ${project.position}`}
+						pictureAttributes={{ 'data-parallax': project.drift }}
+					/>
+				</div>
+				<ProjectCaption title={project.name} description={project.description} as="h3" />
+			</article>
+		))}
+	</div>
+
+	<article class="featured__video">
+		<div class="featured__video-frame parallax" data-video-frame data-cursor-label={video.name}>
+			<video src={video.src} autoplay muted loop playsinline preload="metadata" data-parallax="down" aria-label={`${video.name} explainer video`}></video>
+		</div>
+		<div class="featured__video-footer">
+			<div class="project--edge">
+				<ProjectCaption title={video.name} description={video.description} as="h3" />
+			</div>
+			<ArrowLink href="/projects">View All Projects</ArrowLink>
+		</div>
+	</article>
+</section>
+
+<style>
+	.featured {
+		padding-top: 166px;
+	}
+
+	.featured__header {
+		display: grid;
+		grid-template-columns: 1fr 521px;
+		align-items: start;
+		padding: 0 82px 0 var(--page-gutter);
+		color: var(--color-brand);
+	}
+
+	.featured__intro {
+		padding-top: 35px;
+		color: var(--color-text-muted);
+	}
+
+	.featured__grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		margin-top: 78px;
+	}
+
+	.project {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.project__frame {
+		height: 540px;
+	}
+
+	/* Captions on the page edge get a little breathing room, as in Figma */
+	.project--edge :global(.project-caption) {
+		padding-left: 24px;
+	}
+
+	.project :global(.project-caption) {
+		max-width: 300px;
+	}
+
+	.featured__video {
+		margin-top: 77px;
+	}
+
+	.featured__video-frame {
+		--shift: 50px;
+		aspect-ratio: 1366 / 780;
+	}
+
+	.featured__video-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		padding: 22px 47px 0 0;
+	}
+
+	.featured__video-footer :global(.project-caption) {
+		max-width: 300px;
+	}
+</style>
+
+<script>
+	import { gsap, ScrollTrigger, afterIntro, fadeUp, fontsReady, parallax, reducedMotion, riseIn } from '../scripts/motion';
+
+	const section = document.querySelector<HTMLElement>('.featured');
+
+	if (section) {
+		const title = section.querySelector<HTMLElement>('[data-rise]');
+		const intro = section.querySelector<HTMLElement>('[data-fade]');
+		const frames = gsap.utils.toArray<HTMLElement>('[data-reveal]', section);
+		const videoFrame = section.querySelector<HTMLElement>('[data-video-frame]');
+
+		fontsReady().then(() => {
+			if (title) riseIn(title, { trigger: title, start: 'top 85%' });
+			if (intro) fadeUp(intro, { trigger: title ?? intro, start: 'top 85%' }, { delay: 0.35 });
+		});
+
+		// Parallax: 1st and 3rd drift up inside their frames, 2nd drifts down
+		section.querySelectorAll<HTMLElement>('[data-parallax]').forEach((media) => {
+			parallax(media, media.dataset.parallax === 'down' ? 1 : -1);
+		});
+
+		if (!reducedMotion) {
+			// Each frame opens from its own bottom-right corner, slightly staggered
+			gsap.fromTo(
+				frames,
+				{ clipPath: 'inset(100% 0% 0% 100%)' },
+				{
+					clipPath: 'inset(0% 0% 0% 0%)',
+					duration: 1.6,
+					ease: 'expo.inOut',
+					stagger: 0.16,
+					scrollTrigger: { trigger: frames[0], start: 'top 85%', once: true },
+				},
+			);
+
+			if (videoFrame) fadeUp(videoFrame, { trigger: videoFrame, start: 'top 85%' }, { y: 40, duration: 1.8 });
+		}
+
+		// Layout can change once the intro hands over; re-measure trigger positions
+		afterIntro(() => ScrollTrigger.refresh());
+	}
+</script>

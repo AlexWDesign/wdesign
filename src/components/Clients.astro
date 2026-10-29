@@ -1,0 +1,85 @@
+---
+/*
+ * "Our select clients" (Figma 37:5386–5463): six equal columns, two rows,
+ * hairline rules at 10% black. Logo files are 2× the 170×120 Figma boxes and
+ * already padded, so each one simply fills its box.
+ */
+const clients = [
+	{ name: 'University of Waterloo', file: 'uw-bw.jpg' },
+	{ name: 'Nord Quantique', file: 'nord-quantique-bw.jpg' },
+	{ name: 'Homewood Research Institute', file: 'hri-bw.jpg' },
+	{ name: 'Seeing Red Media', file: 'seeing-red-media-bw.jpg' },
+	{ name: 'CIVIC Credit Union', file: 'civic-bw.jpg' },
+	{ name: 'VEI', file: 'vei-bw.jpg' },
+	{ name: 'Wilfrid Laurier University', file: 'laurier-bw.jpg' },
+	{ name: 'VIVE Development', file: 'vive-bw.jpg' },
+	{ name: 'Blue Dragon', file: 'blue-dragon-bw.jpg' },
+	{ name: 'Green Prairie', file: 'green-prairie-bw.jpg' },
+	{ name: 'The Food Bank of Waterloo Region', file: 'food-bank-bw.jpg' },
+	{ name: 'SMART Remediation', file: 'smart-remediation-bw.jpg' },
+];
+---
+
+<section class="clients" aria-labelledby="clients-title">
+	<h2 id="clients-title" class="clients__title t-caption-body">Our select clients</h2>
+	<ul class="clients__grid">
+		{clients.map((client) => (
+			<li class="clients__cell">
+				<img
+					class="clients__logo"
+					src={`/client-logo/${client.file}`}
+					alt={client.name}
+					width="170"
+					height="120"
+					loading="lazy"
+					decoding="async"
+				/>
+			</li>
+		))}
+	</ul>
+</section>
+
+<style>
+	.clients {
+		padding-top: 125px;
+	}
+
+	.clients__title {
+		padding-left: 86px;
+	}
+
+	.clients__grid {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		grid-template-rows: 199px 206px;
+		margin-top: 30px;
+		border-top: 1px solid var(--color-rule);
+		border-bottom: 1px solid var(--color-rule);
+	}
+
+	.clients__cell {
+		display: grid;
+		place-items: center;
+		overflow: hidden;
+	}
+
+	.clients__cell:not(:nth-child(6n + 1)) {
+		border-left: 1px solid var(--color-rule);
+	}
+
+	.clients__cell:nth-child(-n + 6) {
+		border-bottom: 1px solid var(--color-rule);
+	}
+
+	.clients__logo {
+		width: 170px;
+		height: 120px;
+		object-fit: contain;
+		mix-blend-mode: multiply;
+		transition: transform 1.1s var(--ease-out-expo);
+	}
+
+	.clients__cell:hover .clients__logo {
+		transform: scale(1.06);
+	}
+</style>

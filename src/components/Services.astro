@@ -1,0 +1,214 @@
+---
+/*
+ * Services (Figma: Home - Desktop, 37:5279; list from 38:5546).
+ *
+ * The page background turns navy as this section comes in. The section then
+ * pins: "Services" holds still while the descriptions on the right scroll up
+ * one at a time — the active one at full strength, its neighbours at 20%.
+ * After the last one, the background fades back to white as the page moves on.
+ */
+const services = [
+	{
+		name: 'Strategic Branding',
+		description:
+			'Research-led strategy, naming and identity systems that give your organization a clear voice and a look people remember.',
+	},
+	{
+		name: 'Print',
+		description:
+			'Annual reports, brochures, stationery and campaign collateral, crafted with care from first layout to final press check.',
+	},
+	{
+		name: 'Packaging',
+		description:
+			'Packaging that earns its place on the shelf, balancing brand story, product information and production realities.',
+	},
+	{
+		name: 'Tradeshow Display',
+		description:
+			'Booths, banners and environmental graphics that draw a crowd and make your brand impossible to walk past.',
+	},
+	{
+		name: 'Website Design + Dev',
+		description:
+			'Strategy, UX, design and in-house development for websites that turn your brand into fast, engaging digital experiences.',
+	},
+	{
+		name: 'Motion Graphics',
+		description:
+			'Explainer videos, animated brand assets and social content that bring your story to life in motion.',
+	},
+];
+---
+
+<section class="services" aria-labelledby="services-title" data-services>
+	<div class="services__stage" data-services-stage>
+		<h2 id="services-title" class="services__title t-h1" data-rise>Services</h2>
+		<div class="services__window">
+			<ul class="services__list" data-services-list>
+				{services.map((service) => (
+					<li class="services__item" data-service>
+						<h3 class="t-h3">{service.name}</h3>
+						<p class="services__description">{service.description}</p>
+					</li>
+				))}
+			</ul>
+		</div>
+	</div>
+</section>
+
+<style>
+	.services {
+		color: var(--color-white);
+	}
+
+	.services__stage {
+		--anchor: calc(50% - 60px);
+		position: relative;
+		height: 100vh;
+		min-height: 640px;
+		overflow: hidden;
+	}
+
+	/* "Services" lines up with the top of the active service, as in Figma */
+	.services__title {
+		position: absolute;
+		top: var(--anchor);
+		left: var(--page-gutter);
+		line-height: 1;
+		/* Optical alignment of the cap height with the service title */
+		margin-top: -8px;
+	}
+
+	.services__window {
+		position: absolute;
+		inset: 0 var(--page-gutter) 0 auto;
+		width: 612px;
+	}
+
+	.services__list {
+		position: absolute;
+		top: var(--anchor);
+		left: 0;
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 86px;
+	}
+
+	.services__item {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		opacity: 0.2;
+	}
+
+	/* Figma sets these in Figtree Light 18; Elza Text Light is the site's body face */
+	.services__description {
+		font-family: var(--font-body);
+		font-weight: 300;
+		font-size: 18px;
+		line-height: 1.35;
+		letter-spacing: -0.022em;
+	}
+</style>
+
+<script>
+	import { gsap, ScrollTrigger, fadeUp, fontsReady, reducedMotion, riseIn } from '../scripts/motion';
+
+	const section = document.querySelector<HTMLElement>('[data-services]');
+	const stage = section?.querySelector<HTMLElement>('[data-services-stage]');
+	const list = section?.querySelector<HTMLElement>('[data-services-list]');
+	const page = document.querySelector<HTMLElement>('main');
+
+	if (section && stage && list && page) {
+		const items = gsap.utils.toArray<HTMLElement>('[data-service]', list);
+		const title = section.querySelector<HTMLElement>('[data-rise]');
+		const steps = items.length - 1;
+		// Scroll distance per service, as a share of the viewport height
+		const stepLength = 0.6;
+		// Hold before the first move and after the last service
+		const holdStart = 0.3;
+		const holdEnd = 0.6;
+
+		/* ---- Background: white → navy on the way in, back to white on the way out ---- */
+
+		const toNavy = gsap.utils.interpolate('#ffffff', '#0a3254');
+		let fadeIn = 0;
+		let fadeOut = 0;
+		const paint = () => {
+			page.style.backgroundColor = toNavy(fadeIn * (1 - fadeOut));
+		};
+
+		ScrollTrigger.create({
+			trigger: section,
+			start: 'top 75%',
+			end: 'top 20%',
+			onUpdate: (self) => {
+				fadeIn = self.progress;
+				paint();
+			},
+		});
+
+		/* ---- Pinned list: position 0 … steps, one service per step ---- */
+
+		const offsets = () => items.map((item) => item.offsetTop);
+		let itemTops = offsets();
+
+		const render = (position: number) => {
+			const i = Math.min(Math.floor(position), steps - 1);
+			const t = position - i;
+			const y = itemTops[i] + (itemTops[i + 1] - itemTops[i]) * t;
+			gsap.set(list, { y: -y });
+
+			items.forEach((item, index) => {
+				const distance = Math.abs(index - position);
+				const opacity = distance <= 1 ? 1 - 0.8 * distance : Math.max(0, 0.2 * (2 - distance));
+				item.style.opacity = String(opacity);
+			});
+		};
+
+		const progress = { position: 0 };
+		render(0);
+
+		const timeline = gsap
+			.timeline({
+				scrollTrigger: {
+					trigger: section,
+					start: 'top top',
+					end: () => `+=${(holdStart + steps + holdEnd) * stepLength * window.innerHeight}`,
+					pin: stage,
+					scrub: reducedMotion ? true : 0.6,
+					invalidateOnRefresh: true,
+					onRefresh: () => {
+						itemTops = offsets();
+						render(progress.position);
+					},
+				},
+			})
+			.to({}, { duration: holdStart })
+			.to(progress, { position: steps, duration: steps, ease: 'none', onUpdate: () => render(progress.position) })
+			.to({}, { duration: holdEnd });
+
+		const pin = timeline.scrollTrigger!;
+
+		ScrollTrigger.create({
+			trigger: section,
+			// From the moment the last service settles until the section has mostly left
+			start: () => pin.end - holdEnd * stepLength * window.innerHeight,
+			end: () => pin.end + window.innerHeight * 0.45,
+			invalidateOnRefresh: true,
+			onUpdate: (self) => {
+				fadeOut = self.progress;
+				paint();
+			},
+		});
+
+		/* ---- Entrance once the background has turned ---- */
+
+		fontsReady().then(() => {
+			if (title) riseIn(title, { trigger: section, start: 'top 25%' });
+			fadeUp(list.parentElement!, { trigger: section, start: 'top 25%' }, { delay: 0.45, y: 40 });
+		});
+	}
+</script>

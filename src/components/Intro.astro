@@ -194,6 +194,7 @@ const words: Word[] = [
 		root.classList.remove('intro-pending');
 		document.querySelector('[data-intro]')?.remove();
 		document.querySelector('[data-intro-logo]')?.remove();
+		window.dispatchEvent(new Event('intro:done'));
 	}
 
 	if (root.classList.contains('intro-pending')) playIntro();

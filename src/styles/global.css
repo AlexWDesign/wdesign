@@ -10,6 +10,9 @@
 	/* Colour */
 	--color-brand: #003d68;
 	--color-navy: #0b3254;
+	--color-navy-bg: #0a3254;
+	--color-slate: #546f87;
+	--color-rule: rgb(0 0 0 / 0.1);
 	--color-accent: #ff8300;
 	--color-text: #1f1f1f;
 	--color-text-muted: #6f7174;
@@ -84,6 +87,36 @@ ul {
 	margin: 0;
 	padding: 0;
 	list-style: none;
+}
+
+/* Headings that riseIn() splits into letters stay hidden until then */
+.js [data-rise] {
+	visibility: hidden;
+}
+
+/*
+ * Frame for scroll parallax: the media inside is `--shift` taller above and
+ * below so it can drift without showing an edge (see parallax() in motion.ts).
+ */
+.parallax {
+	--shift: 30px;
+	position: relative;
+	overflow: hidden;
+}
+
+.parallax > :is(img, video, picture) {
+	position: absolute;
+	left: 0;
+	top: calc(var(--shift) * -1);
+	width: 100%;
+	height: calc(100% + var(--shift) * 2);
+	object-fit: cover;
+}
+
+.parallax > picture img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
 
 .sr-only {

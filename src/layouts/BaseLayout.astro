@@ -36,6 +36,8 @@ const {
 		<script is:inline>
 			(function () {
 				var root = document.documentElement;
+				// Lets CSS hide text that scripts animate in (see [data-rise] in global.css)
+				root.classList.add('js');
 				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 				root.classList.add('intro-pending');
 				setTimeout(function () {

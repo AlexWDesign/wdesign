@@ -1,0 +1,246 @@
+---
+/*
+ * Footer (Figma 37:5275, 37:5308–5382). Positions follow the 1366px frame,
+ * expressed the way Figma constrains them (percentages plus offsets).
+ *
+ * The W in "WDESIGN CO." cycles through its variations. Timing follows the
+ * Figma prototype (each W holds ~0.45s with a 0.05s crossfade, easing
+ * cubic-bezier(0.5, 0, 0.5, 1)), extended from 4 to all 6 variations.
+ */
+
+const navLinks = [
+	{ label: 'Projects', href: '/projects' },
+	{ label: 'Services', href: '/services' },
+	{ label: 'Industries', href: '/industries' },
+	{ label: 'Insights', href: '/insights' },
+	{ label: 'W Bio/About', href: '/about' },
+	{ label: 'Let’s Chat', href: '/contact' },
+];
+
+const socials = [
+	{ label: 'IG', name: 'Instagram', href: '#' },
+	{ label: 'FB', name: 'Facebook', href: '#' },
+	{ label: 'IN', name: 'LinkedIn', href: '#' },
+];
+
+// Horizontal offset of each W within the logo slot, from Figma
+const ws = [
+	{ file: 'Footer_W-1.svg', left: 8, width: 132 },
+	{ file: 'Footer_W-2.svg', left: 8, width: 132 },
+	{ file: 'Footer_W-3.svg', left: 8, width: 143 },
+	{ file: 'Footer_W-4.svg', left: 8, width: 132 },
+	{ file: 'Footer_W-5.svg', left: 30, width: 132 },
+	{ file: 'Footer_W-6.svg', left: 0, width: 132 },
+];
+---
+
+<footer class="footer">
+	<nav class="footer__nav" aria-label="Footer">
+		<ul>
+			{navLinks.map((link) => (
+				<li><a class="footer__link t-footer-link" href={link.href}>{link.label}</a></li>
+			))}
+		</ul>
+	</nav>
+
+	<div class="footer__contact">
+		<address class="footer__details">
+			<a href="mailto:hello@wdesignco.ca">hello@wdesignco.ca</a>
+			<a href="tel:+15196341124">(519)6341124</a>
+			<span>2-105 Randall Drive,<br />Waterloo, ON N2V</span>
+		</address>
+		<ul class="footer__socials">
+			{socials.map((social) => (
+				<li><a class="footer__social" href={social.href} aria-label={social.name}>{social.label}</a></li>
+			))}
+		</ul>
+	</div>
+
+	<a class="footer__logo" href="/" aria-label="W Design Co. home">
+		<span class="footer__ws" style={`--count: ${ws.length}`} aria-hidden="true">
+			{ws.map((w, i) => (
+				<img
+					class="footer__w"
+					src={`/footer-logo-ws/${w.file}`}
+					alt=""
+					width={w.width}
+					height="132"
+					style={`--i: ${i}; left: ${w.left}px`}
+				/>
+			))}
+		</span>
+		<img class="footer__designco" src="/footer-logo-ws/DESIGNCO.svg" alt="" width="610" height="86" />
+	</a>
+
+	<ul class="footer__legal t-micro">
+		<li class="footer__legal-privacy"><a href="/privacy">Privacy Policy</a></li>
+		<li class="footer__legal-terms"><a href="/terms">Site Terms &amp; Conditions</a></li>
+		<li class="footer__legal-copy">©2026</li>
+	</ul>
+</footer>
+
+<style>
+	.footer {
+		position: relative;
+		height: 483px;
+		background: var(--color-navy);
+		color: var(--color-white);
+	}
+
+	.footer__nav {
+		position: absolute;
+		top: 166px;
+		left: var(--page-gutter);
+	}
+
+	.footer__nav ul {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.footer__link,
+	.footer__details a,
+	.footer__legal a {
+		text-decoration: underline;
+		text-decoration-color: transparent;
+		text-decoration-thickness: from-font;
+		text-underline-position: from-font;
+		transition: text-decoration-color 0.35s var(--ease-out-expo);
+	}
+
+	.footer__link:hover,
+	.footer__details a:hover,
+	.footer__legal a:hover {
+		text-decoration-color: currentColor;
+	}
+
+	.footer__contact {
+		position: absolute;
+		top: 166px;
+		left: calc(12.5% + 96.25px);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		width: 209px;
+		height: 177px;
+	}
+
+	.footer__details {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding-left: 4px;
+		font-family: var(--font-body);
+		font-weight: 300;
+		font-size: 18px;
+		font-style: normal;
+		line-height: 1.25;
+		white-space: nowrap;
+	}
+
+	.footer__socials {
+		display: flex;
+		gap: 18px;
+	}
+
+	.footer__social {
+		display: grid;
+		place-items: center;
+		width: 36px;
+		height: 36px;
+		color: var(--color-slate);
+		font-family: var(--font-display);
+		font-weight: var(--weight-extra-bold);
+		font-size: 24px;
+		line-height: 1;
+		letter-spacing: -0.027em;
+		transition: color 0.4s var(--ease-out-expo);
+	}
+
+	.footer__social:hover {
+		color: var(--color-white);
+	}
+
+	/* "W" slot + "DESIGN CO." */
+	.footer__logo {
+		position: absolute;
+		top: 141px;
+		left: calc(37.5% + 23.75px);
+		width: 750px;
+		height: 132px;
+	}
+
+	.footer__ws {
+		position: absolute;
+		inset: 0 auto 0 0;
+		width: 173px;
+	}
+
+	.footer__w {
+		position: absolute;
+		top: 0;
+		height: 132px;
+		max-width: none;
+		opacity: 0;
+		animation: footer-w calc(var(--count) * 0.5s) cubic-bezier(0.5, 0, 0.5, 1) infinite both;
+		animation-delay: calc(var(--i) * 0.5s);
+	}
+
+	/* One slot is 1/6 of the cycle: 0.05s fade in, hold, 0.05s fade out */
+	@keyframes footer-w {
+		0% {
+			opacity: 0;
+		}
+		1.667% {
+			opacity: 1;
+		}
+		15% {
+			opacity: 1;
+		}
+		16.667%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	.footer__designco {
+		position: absolute;
+		top: 23px;
+		left: 140px;
+	}
+
+	.footer__legal {
+		position: absolute;
+		inset: 318px 0 auto;
+		height: 25px;
+	}
+
+	.footer__legal li {
+		position: absolute;
+		top: 0;
+		white-space: nowrap;
+	}
+
+	.footer__legal-privacy {
+		left: calc(68.75% + 27.88px);
+	}
+
+	.footer__legal-terms {
+		left: calc(81.25% - 31.88px);
+	}
+
+	.footer__legal-copy {
+		left: calc(93.75% - 33.63px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.footer__w {
+			animation: none;
+		}
+
+		.footer__w:first-child {
+			opacity: 1;
+		}
+	}
+</style>
