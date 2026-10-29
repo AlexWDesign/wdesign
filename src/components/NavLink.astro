@@ -1,0 +1,81 @@
+---
+/*
+ * Text link with the hover arrow (Figma component "Link", 37:5486).
+ * `dark` is for dark backgrounds (white text), `light` for light ones.
+ */
+import ArrowWhite from '../assets/link-arrow-white.svg';
+import ArrowInk from '../assets/link-arrow-ink.svg';
+
+interface Props {
+	href: string;
+	mode?: 'dark' | 'light';
+}
+
+const { href, mode = 'light' } = Astro.props;
+const Arrow = mode === 'dark' ? ArrowWhite : ArrowInk;
+---
+
+<a class:list={['nav-link', 't-nav', `nav-link--${mode}`]} href={href}>
+	<span class="nav-link__text"><slot /></span>
+	<span class="nav-link__arrow" aria-hidden="true"><Arrow /></span>
+</a>
+
+<style>
+	.nav-link {
+		position: relative;
+		display: block;
+		padding: 4px 8px;
+		white-space: nowrap;
+	}
+
+	.nav-link--light {
+		color: var(--color-text);
+	}
+
+	.nav-link--dark {
+		color: var(--color-white);
+	}
+
+	.nav-link__text {
+		text-decoration: underline;
+		text-decoration-color: transparent;
+		text-decoration-thickness: from-font;
+		text-underline-position: from-font;
+		transition: text-decoration-color 0.35s var(--ease-out-expo);
+	}
+
+	/* 7px arrow; the SVG is drawn 0.625px larger on each side for the stroke */
+	.nav-link__arrow {
+		position: absolute;
+		left: -8px;
+		bottom: -8px;
+		width: 7px;
+		height: 7px;
+		opacity: 0;
+		transition:
+			transform 0.6s var(--ease-out-expo),
+			opacity 0.3s var(--ease-out-expo);
+	}
+
+	.nav-link__arrow :global(svg) {
+		margin: -0.625px;
+		width: calc(100% + 1.25px);
+		height: calc(100% + 1.25px);
+	}
+
+	/* Hover: underline in, arrow travels from (-8, -8) to (-2, -3) */
+	.nav-link:hover .nav-link__text,
+	.nav-link:focus-visible .nav-link__text {
+		text-decoration-color: currentColor;
+	}
+
+	.nav-link:hover .nav-link__arrow,
+	.nav-link:focus-visible .nav-link__arrow {
+		opacity: 1;
+		transform: translate(6px, -5px);
+	}
+
+	.nav-link:focus-visible {
+		outline: none;
+	}
+</style>

@@ -1,5 +1,6 @@
 ---
 import LogoW from '../assets/logo-w-nav.svg';
+import NavLink from './NavLink.astro';
 
 const leftLinks = [
 	{ label: 'Services', href: '/services' },
@@ -16,7 +17,7 @@ const rightLinks = [
 <nav class="nav" aria-label="Main">
 	<ul class="nav__group">
 		{leftLinks.map((link) => (
-			<li><a class="nav__link t-nav" href={link.href}>{link.label}</a></li>
+			<li><NavLink href={link.href} mode="dark">{link.label}</NavLink></li>
 		))}
 	</ul>
 
@@ -26,7 +27,7 @@ const rightLinks = [
 
 	<ul class="nav__group nav__group--end">
 		{rightLinks.map((link) => (
-			<li><a class="nav__link t-nav" href={link.href}>{link.label}</a></li>
+			<li><NavLink href={link.href} mode="dark">{link.label}</NavLink></li>
 		))}
 	</ul>
 </nav>
@@ -56,23 +57,11 @@ const rightLinks = [
 		justify-content: flex-end;
 	}
 
-	.nav__link,
+	.nav__group li,
 	.nav__logo {
 		pointer-events: auto;
 	}
 
-	.nav__link {
-		display: block;
-		padding: 4px 8px;
-		white-space: nowrap;
-		transition: opacity 0.4s var(--ease-out-expo);
-	}
-
-	.nav__link:hover {
-		opacity: 0.7;
-	}
-
-	.nav__link:focus-visible,
 	.nav__logo:focus-visible {
 		outline: 1px solid currentColor;
 		outline-offset: 4px;

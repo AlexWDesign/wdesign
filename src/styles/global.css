@@ -234,11 +234,11 @@ ul {
 	letter-spacing: 0.04em;
 }
 
-/* Custom cursor label — Articulat Heavy 10, uppercase */
+/* Custom cursor label — Articulat Heavy, uppercase (10px in Figma, enlarged for legibility) */
 .t-label {
 	font-family: var(--font-display);
 	font-weight: var(--weight-heavy);
-	font-size: 10px;
+	font-size: 12px;
 	line-height: 1;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
