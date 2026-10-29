@@ -1,0 +1,200 @@
+---
+/*
+ * Loading intro (Figma: "Home - Loading Animation").
+ *
+ * 1. Tagline fades in word by word.
+ * 2. The W fades in above it.
+ * 3. After a short hold, the tagline and the white overlay fade out while the
+ *    W shrinks, turns white and flies into its place in the nav.
+ *
+ * Only runs when BaseLayout has set `html.intro-pending`, so it is skipped for
+ * reduced motion and when JavaScript is off.
+ */
+import LogoW from '../assets/logo-w.svg';
+
+// `bold` words are Articulat Bold, `plus` is the orange accent, and `end`
+// marks a sentence end, followed by a double space as in Figma.
+type Word = { text: string; bold?: boolean; plus?: boolean; end?: boolean };
+
+const words: Word[] = [
+	{ text: 'Strategy', bold: true },
+	{ text: '+', bold: true, plus: true },
+	{ text: 'Design', bold: true },
+	{ text: '+', bold: true, plus: true },
+	{ text: 'Digital', bold: true, end: true },
+	{ text: 'Everything' },
+	{ text: 'Your' },
+	{ text: 'Brand' },
+	{ text: 'Needs.', end: true },
+	{ text: 'All' },
+	{ text: 'in' },
+	{ text: 'One' },
+	{ text: 'Place.' },
+];
+---
+
+<div class="intro" data-intro aria-hidden="true">
+	<p class="intro__tagline t-tagline" data-intro-tagline>
+		{words.map((word, i) => (
+			<>
+				<span class:list={['intro__word', { 'intro__plus': word.plus }]}>
+					{word.bold ? <strong>{word.text}</strong> : word.text}{word.bold && word.end && '.'}
+				</span>
+				{i < words.length - 1 && (word.end ? '  ' : ' ')}
+			</>
+		))}
+	</p>
+</div>
+
+<div class="intro__logo" data-intro-logo aria-hidden="true">
+	<LogoW />
+</div>
+
+<style>
+	.intro {
+		display: none;
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		background: var(--color-white);
+	}
+
+	.intro__tagline {
+		position: absolute;
+		top: calc(50% + 11px);
+		left: 0;
+		right: 0;
+		color: var(--color-brand);
+		text-align: center;
+		white-space: nowrap;
+	}
+
+	.intro__word {
+		display: inline-block;
+		opacity: 0;
+		will-change: transform, opacity, filter;
+	}
+
+	.intro__plus {
+		color: var(--color-accent);
+	}
+
+	.intro__logo {
+		display: none;
+		position: fixed;
+		top: calc(50% - 73px);
+		left: calc(50% - 44px);
+		z-index: 1001;
+		width: 88px;
+		height: 60px;
+		opacity: 0;
+		will-change: transform, opacity;
+	}
+
+	/* The Figma logo vector is drawn upside down and flipped in the design */
+	.intro__logo :global(svg) {
+		transform: scaleY(-1);
+	}
+
+	:global(html.intro-pending) {
+		overflow: hidden;
+	}
+
+	:global(html.intro-pending) .intro,
+	:global(html.intro-pending) .intro__logo {
+		display: block;
+	}
+</style>
+
+<script>
+	import { gsap } from 'gsap';
+
+	declare global {
+		interface Window {
+			__introStarted?: boolean;
+		}
+	}
+
+	const root = document.documentElement;
+
+	const waitForFonts = () =>
+		Promise.race([document.fonts.ready, new Promise((resolve) => setTimeout(resolve, 2000))]);
+
+	async function playIntro() {
+		window.__introStarted = true;
+
+		// Always start at the top so the nav logo is where the W flies to
+		if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+		window.scrollTo(0, 0);
+
+		const intro = document.querySelector<HTMLElement>('[data-intro]');
+		const tagline = document.querySelector<HTMLElement>('[data-intro-tagline]');
+		const logo = document.querySelector<HTMLElement>('[data-intro-logo]');
+		const navLogo = document.querySelector<HTMLElement>('[data-nav-logo]');
+		const heroImage = document.querySelector<HTMLElement>('[data-hero-image]');
+		if (!intro || !tagline || !logo || !navLogo) return finish();
+
+		const words = tagline.querySelectorAll('.intro__word');
+		const logoPath = logo.querySelector('path');
+
+		// Don't animate words in a fallback font and then swap mid-animation
+		await waitForFonts();
+
+		// Where the W ends up: centre of the nav logo, at the nav logo's size
+		const flight = () => {
+			const from = logo.getBoundingClientRect();
+			const to = navLogo.getBoundingClientRect();
+			return {
+				x: to.left + to.width / 2 - (from.left + from.width / 2),
+				y: to.top + to.height / 2 - (from.top + from.height / 2),
+				scale: to.width / from.width,
+			};
+		};
+
+		const tl = gsap.timeline({ onComplete: finish });
+
+		tl.fromTo(
+			words,
+			{ opacity: 0, y: 14, filter: 'blur(8px)' },
+			{ opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.1, ease: 'expo.out', stagger: 0.055 },
+		)
+			.fromTo(
+				logo,
+				{ opacity: 0, y: 10 },
+				{ opacity: 1, y: 0, duration: 1.2, ease: 'expo.out' },
+				'-=0.7',
+			)
+			// Hold for a beat once the W has settled
+			.addLabel('exit', '+=0.5')
+			.to(tagline, { opacity: 0, y: -10, filter: 'blur(6px)', duration: 0.7, ease: 'power2.in' }, 'exit')
+			.to(intro, { opacity: 0, duration: 1.2, ease: 'power2.inOut' }, 'exit+=0.15')
+			.to(
+				logo,
+				{
+					x: () => flight().x,
+					y: () => flight().y,
+					scale: () => flight().scale,
+					duration: 1.4,
+					ease: 'expo.inOut',
+				},
+				'exit',
+			);
+
+		if (logoPath) {
+			tl.to(logoPath, { attr: { fill: '#ffffff' }, duration: 1, ease: 'power2.inOut' }, 'exit+=0.2');
+		}
+
+		// Small settle on the hero image as the overlay lifts
+		if (heroImage) {
+			tl.fromTo(heroImage, { scale: 1.06 }, { scale: 1, duration: 2, ease: 'expo.out' }, 'exit+=0.2');
+		}
+	}
+
+	function finish() {
+		root.classList.remove('intro-pending');
+		document.querySelector('[data-intro]')?.remove();
+		document.querySelector('[data-intro-logo]')?.remove();
+	}
+
+	if (root.classList.contains('intro-pending')) playIntro();
+</script>

@@ -1,0 +1,66 @@
+---
+import { Picture } from 'astro:assets';
+import Nav from './Nav.astro';
+import ProjectCaption from './ProjectCaption.astro';
+import heroImage from '../assets/hero-a4c.jpg';
+
+const project = {
+	name: 'Adventure4Change',
+	href: '/projects/adventure4change',
+	description:
+		'This sunny, transformational rebrand has uplifted the A4C brand, their staff and the communities they serve.',
+};
+---
+
+<header class="hero">
+	<h1 class="sr-only">W Design Co. Strategy, design and digital for your brand.</h1>
+	<Nav />
+	<a class="hero__media" href={project.href} data-cursor-label={project.name} aria-label={`${project.name} project`}>
+		<Picture
+			src={heroImage}
+			formats={['avif', 'webp']}
+			widths={[1366, 1920]}
+			sizes="100vw"
+			alt="Adventure4Change business cards showing the new A4C brand"
+			loading="eager"
+			fetchpriority="high"
+			class="hero__image"
+			data-hero-image
+		/>
+	</a>
+</header>
+
+<section class="hero-caption" aria-label="Featured project">
+	<ProjectCaption title={project.name} description={project.description} />
+</section>
+
+<style>
+	.hero {
+		position: relative;
+		height: 100svh;
+		min-height: 640px;
+		overflow: hidden;
+		background: #1c939f;
+	}
+
+	.hero__media {
+		position: absolute;
+		inset: 0;
+		display: block;
+		overflow: hidden;
+	}
+
+	.hero__media :global(picture),
+	.hero__image {
+		width: 100%;
+		height: 100%;
+	}
+
+	.hero__image {
+		object-fit: cover;
+	}
+
+	.hero-caption {
+		padding: 31px var(--page-gutter) 160px;
+	}
+</style>

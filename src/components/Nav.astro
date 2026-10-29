@@ -1,0 +1,90 @@
+---
+import LogoW from '../assets/logo-w-nav.svg';
+
+const leftLinks = [
+	{ label: 'Services', href: '/services' },
+	{ label: 'Projects', href: '/projects' },
+	{ label: 'Industries', href: '/industries' },
+];
+
+const rightLinks = [
+	{ label: 'About', href: '/about' },
+	{ label: 'Let’s Chat', href: '/contact' },
+];
+---
+
+<nav class="nav" aria-label="Main">
+	<ul class="nav__group">
+		{leftLinks.map((link) => (
+			<li><a class="nav__link t-nav" href={link.href}>{link.label}</a></li>
+		))}
+	</ul>
+
+	<a class="nav__logo" href="/" aria-label="W Design Co. home">
+		<span class="nav__logo-mark" data-nav-logo><LogoW aria-hidden="true" /></span>
+	</a>
+
+	<ul class="nav__group nav__group--end">
+		{rightLinks.map((link) => (
+			<li><a class="nav__link t-nav" href={link.href}>{link.label}</a></li>
+		))}
+	</ul>
+</nav>
+
+<style>
+	.nav {
+		position: absolute;
+		inset: 0 0 auto;
+		z-index: 2;
+		/* Logo sits dead centre regardless of how wide each link group is */
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		align-items: center;
+		padding: 15px var(--nav-gutter);
+		color: var(--color-white);
+		/* Let the hero image (and its cursor label) receive hover through the empty parts */
+		pointer-events: none;
+	}
+
+	.nav__group {
+		display: flex;
+		align-items: center;
+		gap: 32px;
+	}
+
+	.nav__group--end {
+		justify-content: flex-end;
+	}
+
+	.nav__link,
+	.nav__logo {
+		pointer-events: auto;
+	}
+
+	.nav__link {
+		display: block;
+		padding: 4px 8px;
+		white-space: nowrap;
+		transition: opacity 0.4s var(--ease-out-expo);
+	}
+
+	.nav__link:hover {
+		opacity: 0.7;
+	}
+
+	.nav__link:focus-visible,
+	.nav__logo:focus-visible {
+		outline: 1px solid currentColor;
+		outline-offset: 4px;
+	}
+
+	/* Hidden until the intro logo lands here */
+	:global(html.intro-pending) .nav__logo-mark {
+		visibility: hidden;
+	}
+
+	/* The Figma logo vector is drawn upside down and flipped in the design */
+	.nav__logo-mark :global(svg) {
+		transform: scaleY(-1);
+	}
+</style>

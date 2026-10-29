@@ -1,0 +1,24 @@
+---
+interface Props {
+	title: string;
+	description: string;
+	/** Heading level for the project title */
+	as?: 'h2' | 'h3';
+}
+
+const { title, description, as: Heading = 'h2' } = Astro.props;
+---
+
+<div class="project-caption">
+	<Heading class="t-caption-title">{title}</Heading>
+	<p class="t-caption-body">{description}</p>
+</div>
+
+<style>
+	.project-caption {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		max-width: 424px;
+	}
+</style>

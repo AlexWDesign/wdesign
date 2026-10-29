@@ -1,0 +1,245 @@
+/*
+ * W Design Co. — design tokens and type styles, taken from the
+ * "Figma --> Claude" file (Home - Desktop, 1366px frame).
+ *
+ * Fonts come from the Adobe Fonts kit linked in BaseLayout.astro, which
+ * serves Articulat CF 100–900 and Elza Text 300–700.
+ */
+
+:root {
+	/* Colour */
+	--color-brand: #003d68;
+	--color-navy: #0b3254;
+	--color-accent: #ff8300;
+	--color-text: #1f1f1f;
+	--color-text-muted: #6f7174;
+	--color-white: #fff;
+
+	/* Families */
+	--font-display: "articulat-cf", system-ui, sans-serif;
+	--font-body: "elza-text", system-ui, sans-serif;
+
+	/* Articulat CF weights as named in Figma */
+	--weight-thin: 100;
+	--weight-extra-light: 200;
+	--weight-light: 300;
+	--weight-regular: 400;
+	--weight-medium: 500;
+	--weight-demi-bold: 600;
+	--weight-bold: 700;
+	--weight-extra-bold: 800;
+	--weight-heavy: 900;
+
+	/* Layout */
+	--page-gutter: 80px;
+	--nav-gutter: 72px;
+
+	/* Motion — expo-style curves used across the site */
+	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	/* Keep the layout from shifting when the intro unlocks scrolling */
+	scrollbar-gutter: stable;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+body {
+	margin: 0;
+	background: var(--color-white);
+	color: var(--color-text);
+	font-family: var(--font-body);
+	font-weight: 300;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+	margin: 0;
+}
+
+img,
+picture,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/*
+ * Type styles. Letter-spacing is converted from Figma's px values to em so
+ * it stays proportional if sizes change.
+ */
+
+/* "Every brand, big or small" — Articulat Extra Bold 100.5 */
+.t-display-xl {
+	font-family: var(--font-display);
+	font-weight: var(--weight-extra-bold);
+	font-size: 100.5px;
+	line-height: 1;
+	letter-spacing: -0.0267em;
+}
+
+/* "Let's build your vision together" — Articulat 84 (Thin + Bold) */
+.t-display-l {
+	font-family: var(--font-display);
+	font-weight: var(--weight-bold);
+	font-size: 84px;
+	line-height: 1;
+	letter-spacing: -0.0267em;
+}
+
+/* "Featured Projects", "Services" — Articulat Extra Bold 72 */
+.t-h1 {
+	font-family: var(--font-display);
+	font-weight: var(--weight-extra-bold);
+	font-size: 72px;
+	line-height: 1.22;
+	letter-spacing: -0.012em;
+}
+
+/* "Testimonials" — Articulat Extra Bold 54 */
+.t-h2 {
+	font-family: var(--font-display);
+	font-weight: var(--weight-extra-bold);
+	font-size: 54px;
+	line-height: 1;
+	letter-spacing: -0.012em;
+}
+
+/* Service names, "view all projects", "contact" — Articulat Extra Bold 36 */
+.t-h3 {
+	font-family: var(--font-display);
+	font-weight: var(--weight-extra-bold);
+	font-size: 36px;
+	line-height: 1.22;
+	letter-spacing: -0.012em;
+}
+
+/* Testimonial client names — Articulat Extra Bold 28 */
+.t-h4 {
+	font-family: var(--font-display);
+	font-weight: var(--weight-extra-bold);
+	font-size: 28px;
+	line-height: 1.22;
+	letter-spacing: -0.012em;
+}
+
+/* Intro tagline — Articulat Light 24, emphasis in Bold */
+.t-tagline {
+	font-family: var(--font-display);
+	font-weight: var(--weight-light);
+	font-size: 24px;
+	line-height: 1.22;
+	letter-spacing: -0.012em;
+}
+
+.t-tagline strong {
+	font-weight: var(--weight-bold);
+}
+
+/* Testimonial quotes — Elza Text Light 18 */
+.t-body-l {
+	font-family: var(--font-body);
+	font-weight: 300;
+	font-size: 18px;
+	line-height: 1.5;
+	letter-spacing: 0.0074em;
+}
+
+/* Section intros — Elza Text Light 17 */
+.t-body-m {
+	font-family: var(--font-body);
+	font-weight: 300;
+	font-size: 17px;
+	line-height: 1.253;
+	letter-spacing: -0.012em;
+}
+
+/* Project caption title — Articulat Demi Bold 14 */
+.t-caption-title {
+	font-family: var(--font-display);
+	font-weight: var(--weight-demi-bold);
+	font-size: 14px;
+	line-height: 1.25;
+	letter-spacing: 0.012em;
+	color: var(--color-brand);
+}
+
+/* Project caption text, small labels — Elza Text Light 14 */
+.t-caption-body {
+	font-family: var(--font-body);
+	font-weight: 300;
+	font-size: 14px;
+	line-height: 1.25;
+	letter-spacing: -0.012em;
+	color: var(--color-text-muted);
+}
+
+/* Main nav links — Elza Text Medium 14 */
+.t-nav {
+	font-family: var(--font-body);
+	font-weight: 500;
+	font-size: 14px;
+	line-height: 1.2;
+}
+
+/* Footer nav — Articulat Extra Light 20 */
+.t-footer-link {
+	font-family: var(--font-display);
+	font-weight: var(--weight-extra-light);
+	font-size: 20px;
+	line-height: 1.25;
+	letter-spacing: 0.04em;
+}
+
+/* Legal links — Articulat Extra Light 12 */
+.t-micro {
+	font-family: var(--font-display);
+	font-weight: var(--weight-extra-light);
+	font-size: 12px;
+	line-height: 25px;
+	letter-spacing: 0.04em;
+}
+
+/* Custom cursor label — Articulat Heavy 10, uppercase */
+.t-label {
+	font-family: var(--font-display);
+	font-weight: var(--weight-heavy);
+	font-size: 10px;
+	line-height: 1;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}

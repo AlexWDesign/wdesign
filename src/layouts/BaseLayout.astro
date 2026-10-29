@@ -1,0 +1,50 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = 'W Design Co.',
+	description = 'Strategy + Design + Digital. Everything your brand needs, all in one place.',
+} = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<title>{title}</title>
+
+		<!-- Adobe Fonts: Articulat CF + Elza Text -->
+		<link rel="preconnect" href="https://use.typekit.net" crossorigin />
+		<link rel="preconnect" href="https://p.typekit.net" crossorigin />
+		<link rel="stylesheet" href="https://use.typekit.net/sib5gwl.css" />
+
+		<!--
+			Marks the page as waiting on the intro before first paint, so the
+			overlay is up before anything else shows. Skipped for reduced motion.
+			If the intro script never starts (e.g. it fails to load), the page is
+			revealed after 4s.
+		-->
+		<script is:inline>
+			(function () {
+				var root = document.documentElement;
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				root.classList.add('intro-pending');
+				setTimeout(function () {
+					if (!window.__introStarted) root.classList.remove('intro-pending');
+				}, 4000);
+			})();
+		</script>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
