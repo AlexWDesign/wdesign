@@ -50,6 +50,11 @@
 html {
 	/* Keep the layout from shifting when the intro unlocks scrolling */
 	scrollbar-gutter: stable;
+	/*
+	 * Pinned sections switch between fixed and normal flow as you scroll;
+	 * scroll anchoring would "correct" for that and make the page jump.
+	 */
+	overflow-anchor: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;

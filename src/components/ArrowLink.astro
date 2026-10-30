@@ -1,17 +1,19 @@
 ---
 /*
  * Large lowercase link with the orange arrow ("view all projects").
+ * `framed` adds the outlined button look ("contact").
  * Hover: the underline draws in from the left and the arrow nudges along
  * its own 45° direction; on leave the underline retracts to the right.
  */
 interface Props {
 	href: string;
+	framed?: boolean;
 }
 
-const { href } = Astro.props;
+const { href, framed = false } = Astro.props;
 ---
 
-<a class="arrow-link t-h3" href={href}>
+<a class:list={['arrow-link', 't-h3', { 'arrow-link--framed': framed }]} href={href}>
 	<span class="arrow-link__text"><slot /></span>
 	<img class="arrow-link__arrow" src="/Link_Arrow.svg" alt="" width="21" height="21" />
 </a>
@@ -24,6 +26,12 @@ const { href } = Astro.props;
 		color: var(--color-brand);
 		text-transform: lowercase;
 		white-space: nowrap;
+	}
+
+	.arrow-link--framed {
+		padding: 8px 32px 12px 24px;
+		border: 1px solid var(--color-navy);
+		color: var(--color-navy);
 	}
 
 	.arrow-link__text {

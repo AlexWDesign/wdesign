@@ -1,0 +1,78 @@
+---
+/*
+ * "Let's build your vision together" (Figma 37:5465–5469) with the 3D image
+ * ring on the right (40:5340). The headline rises in letter by letter like
+ * "Featured Projects".
+ */
+import ArrowLink from './ArrowLink.astro';
+import CtaCarousel from './CtaCarousel.astro';
+---
+
+<section class="cta" aria-labelledby="cta-title">
+	<div class="cta__inner">
+		<h2 id="cta-title" class="cta__title t-display-l" data-rise>
+			<span class="cta__light">Let’s build your vision</span>
+			<span class="cta__bold">together</span>
+		</h2>
+		<div class="cta__action" data-cta-action>
+			<ArrowLink href="/contact" framed>contact</ArrowLink>
+		</div>
+		<div class="cta__carousel">
+			<CtaCarousel />
+		</div>
+	</div>
+</section>
+
+<style>
+	.cta {
+		padding: 237px 0 230px;
+		color: var(--color-navy);
+	}
+
+	.cta__inner {
+		position: relative;
+	}
+
+	.cta__title {
+		padding-left: 76px;
+	}
+
+	.cta__title span {
+		display: block;
+	}
+
+	.cta__light {
+		font-weight: var(--weight-thin);
+		letter-spacing: 0.0023em;
+	}
+
+	/* Figma sets the second line 74px below the first */
+	.cta__bold {
+		margin-top: -10px;
+	}
+
+	.cta__action {
+		margin-top: 53px;
+		padding-left: calc(31.25% + 67.13px);
+	}
+
+	/* Centred on the headline + button block, as in Figma */
+	.cta__carousel {
+		position: absolute;
+		top: 50%;
+		left: calc(62.5% + 12.25px);
+		transform: translateY(-50%);
+	}
+</style>
+
+<script>
+	import { fadeUp, fontsReady, riseIn } from '../scripts/motion';
+
+	const title = document.querySelector<HTMLElement>('#cta-title');
+	const action = document.querySelector<HTMLElement>('[data-cta-action]');
+
+	fontsReady().then(() => {
+		if (title) riseIn(title, { trigger: title, start: 'top 85%' });
+		if (action) fadeUp(action, { trigger: title ?? action, start: 'top 85%' }, { delay: 0.6 });
+	});
+</script>

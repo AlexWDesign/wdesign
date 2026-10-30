@@ -6,6 +6,8 @@ import FeaturedProjects from '../components/FeaturedProjects.astro';
 import Services from '../components/Services.astro';
 import Welcome from '../components/Welcome.astro';
 import Clients from '../components/Clients.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Cta from '../components/Cta.astro';
 import Footer from '../components/Footer.astro';
 import CursorLabel from '../components/CursorLabel.astro';
 ---
@@ -18,15 +20,9 @@ import CursorLabel from '../components/CursorLabel.astro';
 		<Services />
 		<Welcome />
 		<Clients />
-		<!-- Testimonials and the contact CTA come next -->
+		<Testimonials />
+		<Cta />
 	</main>
 	<Footer />
 	<CursorLabel />
 </BaseLayout>
-
-<style>
-	main {
-		/* Space before the footer until Testimonials and the CTA are built */
-		padding-bottom: 160px;
-	}
-</style>

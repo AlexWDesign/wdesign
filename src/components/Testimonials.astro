@@ -1,0 +1,227 @@
+---
+/*
+ * Testimonials (Figma 37:5276–5278, 37:5430–5476).
+ *
+ * Background: navy-to-transparent gradient from the left, with the noise
+ * texture over it in "overlay" mode, fading to white at the bottom.
+ *
+ * Once the section fills the viewport it pins, and scrolling moves the cards
+ * along an arc: queued cards wait lower-right, tilted and veiled (as in Figma);
+ * the focused card sits upright and clear; finished cards fly up and left
+ * over the "Testimonials" heading. Scrolling continues once the last card is
+ * in focus.
+ */
+const testimonials = [
+	{
+		name: 'Homewood Research Institute',
+		logo: '/client-logo/hri.png',
+		quote:
+			'We have engaged W Design Co., for a number of services, including brand design, annual report development, and various creative projects since 2017. Their team is professional, reliable, and highly skilled. They always get our projects finished on-time and on-budget. We would absolutely recommend W Design Co. to anyone seeking creative, branding, and marketing services.',
+	},
+	{
+		name: 'KW Chamber of Commerce',
+		logo: '/client-logo/chamber-kw.png',
+		quote:
+			'The Greater Kitchener Waterloo Chamber of Commerce highly values its relationship with Lesley Warren Design Group. We have worked with them for numerous projects, and their designs are always creative and beautiful! We look forward to watching them continue to succeed in the local business community!',
+	},
+	{
+		name: 'The Food Bank of Waterloo',
+		logo: '/client-logo/food-bank.png',
+		quote:
+			'I have had the pleasure of working with Lesley and her team on a number of projects. They are an incredibly professional, forward-thinking, thoughtful, and talented group of individuals. They think outside of the box and help push brands and projects to the “next level”. Really enjoy working with the team. If you are looking to elevate your brand and create fresh, beautiful materials, I highly recommend W Design Co.',
+	},
+];
+---
+
+<section class="testimonials" aria-labelledby="testimonials-title" data-testimonials>
+	<div class="testimonials__stage" data-testimonials-stage>
+		<div class="testimonials__backdrop" aria-hidden="true"></div>
+		<h2 id="testimonials-title" class="testimonials__title t-h2">Testimonials</h2>
+
+		<div class="testimonials__deck">
+			{testimonials.map((testimonial) => (
+				<article class="testimonial" data-card>
+					<img class="testimonial__logo" src={testimonial.logo} alt="" height="82" loading="lazy" decoding="async" />
+					<h3 class="testimonial__name t-h4">{testimonial.name}</h3>
+					<blockquote class="testimonial__quote t-body-l">
+						<p>{testimonial.quote}</p>
+					</blockquote>
+					<div class="testimonial__veil" data-veil aria-hidden="true"></div>
+				</article>
+			))}
+		</div>
+	</div>
+</section>
+
+<style>
+	/*
+	 * The stage is a viewport plus the fade, so while it's pinned the fade to
+	 * white sits just below the fold and only shows once the section moves on.
+	 */
+	.testimonials__stage {
+		--fade: 320px;
+		/* Where the focused card's top edge and the heading sit */
+		--card-top: calc(50vh - 245px);
+		position: relative;
+		height: calc(100vh + var(--fade));
+		min-height: calc(700px + var(--fade));
+		overflow: hidden;
+		background: var(--color-white);
+	}
+
+	.testimonials__backdrop {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to right, var(--color-navy-bg), rgb(10 50 84 / 0) 95%);
+	}
+
+	/* Noise in overlay mode, strongest on the right and fading out to the left (Figma) */
+	.testimonials__backdrop::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: url('/other/noise-overlay.png') center / cover;
+		mix-blend-mode: overlay;
+		mask-image: linear-gradient(to left, #000 54.9%, transparent);
+	}
+
+	/* Bottom of the section melts into the white page below */
+	.testimonials__backdrop::after {
+		content: '';
+		position: absolute;
+		inset: auto 0 0;
+		height: var(--fade);
+		background: linear-gradient(to bottom, rgb(255 255 255 / 0), var(--color-white));
+	}
+
+	.testimonials__title {
+		position: absolute;
+		top: var(--card-top);
+		left: 77px;
+		color: var(--color-white);
+	}
+
+	.testimonials__deck {
+		position: absolute;
+		inset: 0;
+	}
+
+	.testimonial {
+		position: absolute;
+		top: var(--card-top);
+		left: calc(31.25% + 34.13px);
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+		width: 470px;
+		min-height: 464px;
+		padding: 40px;
+		overflow: hidden;
+		background: var(--color-white);
+		box-shadow: 0 8px 32px rgb(0 0 0 / 0.07);
+		will-change: transform;
+	}
+
+	.testimonial__logo {
+		width: auto;
+		height: 82px;
+		max-width: 306px;
+		object-fit: contain;
+		object-position: left center;
+	}
+
+	.testimonial__name {
+		color: var(--color-brand);
+		text-transform: capitalize;
+	}
+
+	.testimonial__quote {
+		margin: 0;
+		color: var(--color-text);
+	}
+
+	/* Figma's overlay on cards that aren't in focus */
+	.testimonial__veil {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(164.84deg, rgb(165 206 215 / 0) 21.24%, var(--color-navy) 98.83%);
+		opacity: 0;
+		pointer-events: none;
+	}
+</style>
+
+<script>
+	import { gsap, reducedMotion } from '../scripts/motion';
+
+	const section = document.querySelector<HTMLElement>('[data-testimonials]');
+	const stage = section?.querySelector<HTMLElement>('[data-testimonials-stage]');
+
+	if (section && stage) {
+		const cards = gsap.utils.toArray<HTMLElement>('[data-card]', section);
+		const veils = cards.map((card) => card.querySelector<HTMLElement>('[data-veil]'));
+		const steps = cards.length - 1;
+		const stepLength = 0.9;
+		const holdStart = 0.15;
+		const holdEnd = 0.2;
+
+		/*
+		 * The arc, as offsets from the focused slot for each slot index s
+		 * (0 = focus, positive = queued, negative = already shown):
+		 * [x, y, rotation]. Based on the Figma positions, spread out so
+		 * neighbouring cards have about 200px of air between them.
+		 */
+		const firstSlot = -2;
+		const arc: [number, number, number][] = [
+			[-1300, -760, -18],
+			[-660, -250, -7],
+			[0, 0, 0],
+			[680, 120, 4],
+			[1340, 340, 11],
+			[1950, 680, 18],
+		];
+
+		// Smooth curve through the slots (Catmull-Rom)
+		const curve = (a: number, b: number, c: number, d: number, t: number) =>
+			0.5 * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (3 * b - a - 3 * c + d) * t * t * t);
+
+		const sample = (s: number) => {
+			const u = gsap.utils.clamp(0, arc.length - 1, s - firstSlot);
+			const i = Math.min(Math.floor(u), arc.length - 2);
+			const t = u - i;
+			const p0 = arc[Math.max(i - 1, 0)];
+			const p1 = arc[i];
+			const p2 = arc[i + 1];
+			const p3 = arc[Math.min(i + 2, arc.length - 1)];
+			return p1.map((_, k) => curve(p0[k], p1[k], p2[k], p3[k], t));
+		};
+
+		const render = (position: number) => {
+			cards.forEach((card, index) => {
+				const s = index - position;
+				const [x, y, rotation] = sample(s);
+				gsap.set(card, { x, y, rotation, zIndex: Math.round(100 - s * 10) });
+				const veil = veils[index];
+				if (veil) veil.style.opacity = String(Math.min(1, Math.abs(s)) * 0.9);
+			});
+		};
+
+		const progress = { position: 0 };
+		render(0);
+
+		gsap
+			.timeline({
+				scrollTrigger: {
+					trigger: section,
+					start: 'top top',
+					end: () => `+=${(holdStart + steps + holdEnd) * stepLength * window.innerHeight}`,
+					pin: stage,
+					scrub: reducedMotion ? true : 0.8,
+					invalidateOnRefresh: true,
+				},
+			})
+			.to({}, { duration: holdStart })
+			.to(progress, { position: steps, duration: steps, ease: 'none', onUpdate: () => render(progress.position) })
+			.to({}, { duration: holdEnd });
+	}
+</script>

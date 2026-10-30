@@ -113,8 +113,9 @@ const video = {
 		gap: 16px;
 	}
 
+	/* Figma frame is 455 × 540; keep that shape at any window width */
 	.project__frame {
-		height: 540px;
+		aspect-ratio: 455 / 540;
 	}
 
 	/* Captions on the page edge get a little breathing room, as in Figma */

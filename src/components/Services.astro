@@ -43,16 +43,19 @@ const services = [
 
 <section class="services" aria-labelledby="services-title" data-services>
 	<div class="services__stage" data-services-stage>
-		<h2 id="services-title" class="services__title t-h1" data-rise>Services</h2>
-		<div class="services__window">
-			<ul class="services__list" data-services-list>
-				{services.map((service) => (
-					<li class="services__item" data-service>
-						<h3 class="t-h3">{service.name}</h3>
-						<p class="services__description">{service.description}</p>
-					</li>
-				))}
-			</ul>
+		<div class="services__backdrop" data-services-backdrop aria-hidden="true"></div>
+		<div class="services__content" data-services-content>
+			<h2 id="services-title" class="services__title t-h1" data-rise>Services</h2>
+			<div class="services__window">
+				<ul class="services__list" data-services-list>
+					{services.map((service) => (
+						<li class="services__item" data-service>
+							<h3 class="t-h3">{service.name}</h3>
+							<p class="services__description">{service.description}</p>
+						</li>
+					))}
+				</ul>
+			</div>
 		</div>
 	</div>
 </section>
@@ -68,6 +71,41 @@ const services = [
 		height: 100vh;
 		min-height: 640px;
 		overflow: hidden;
+	}
+
+	/*
+	 * Background (Figma 40:5315): a radial glow from the bottom-left corner,
+	 * a navy fade down the left edge, and the noise texture in overlay mode
+	 * at 75%. Its opacity follows the page's white ↔ navy fade (see script).
+	 */
+	.services__backdrop {
+		position: absolute;
+		inset: 0;
+		opacity: 0;
+		background: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1366 772' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'><rect x='0' y='0' height='100%' width='100%' fill='url(%23grad)'/><defs><radialGradient id='grad' gradientUnits='userSpaceOnUse' cx='0' cy='0' r='10' gradientTransform='matrix(138.55 -77.35 136.87 186.36 -37.849 785.5)'><stop stop-color='rgba(28,129,183,1)' offset='0'/><stop stop-color='rgba(19,89,133,1)' offset='0.32689'/><stop stop-color='rgba(15,70,109,1)' offset='0.49034'/><stop stop-color='rgba(10,50,84,1)' offset='0.65379'/></radialGradient></defs></svg>")
+			center / 100% 100% no-repeat;
+	}
+
+	.services__backdrop::before {
+		content: '';
+		position: absolute;
+		inset: 0 auto 0 0;
+		width: 21.5%;
+		background: linear-gradient(110.73deg, var(--color-navy-bg) 11.01%, rgb(10 50 84 / 0) 49.92%);
+	}
+
+	.services__backdrop::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: url('/other/NoiseOverlay_ServicesSection.png') center / cover no-repeat;
+		mix-blend-mode: overlay;
+		opacity: 0.75;
+	}
+
+	.services__content {
+		position: absolute;
+		inset: 0;
 	}
 
 	/* "Services" lines up with the top of the active service, as in Figma */
@@ -119,9 +157,11 @@ const services = [
 	const section = document.querySelector<HTMLElement>('[data-services]');
 	const stage = section?.querySelector<HTMLElement>('[data-services-stage]');
 	const list = section?.querySelector<HTMLElement>('[data-services-list]');
+	const content = section?.querySelector<HTMLElement>('[data-services-content]');
+	const backdrop = section?.querySelector<HTMLElement>('[data-services-backdrop]');
 	const page = document.querySelector<HTMLElement>('main');
 
-	if (section && stage && list && page) {
+	if (section && stage && list && content && backdrop && page) {
 		const items = gsap.utils.toArray<HTMLElement>('[data-service]', list);
 		const title = section.querySelector<HTMLElement>('[data-rise]');
 		const steps = items.length - 1;
@@ -131,19 +171,27 @@ const services = [
 		const holdStart = 0.3;
 		const holdEnd = 0.6;
 
-		/* ---- Background: white → navy on the way in, back to white on the way out ---- */
+		/*
+		 * ---- Background: white → navy on the way in, back to white on the way out ----
+		 * On the way out, "Services" and the last service lift away a little ahead
+		 * of the background.
+		 */
 
 		const toNavy = gsap.utils.interpolate('#ffffff', '#0a3254');
 		let fadeIn = 0;
 		let fadeOut = 0;
 		const paint = () => {
-			page.style.backgroundColor = toNavy(fadeIn * (1 - fadeOut));
+			const navy = fadeIn * (1 - fadeOut);
+			page.style.backgroundColor = toNavy(navy);
+			backdrop.style.opacity = String(navy);
+			const exit = Math.min(1, fadeOut * 1.4);
+			gsap.set(content, { opacity: 1 - exit, y: -80 * exit });
 		};
 
 		ScrollTrigger.create({
 			trigger: section,
-			start: 'top 75%',
-			end: 'top 20%',
+			start: 'top 60%',
+			end: 'top 10%',
 			onUpdate: (self) => {
 				fadeIn = self.progress;
 				paint();
@@ -204,11 +252,11 @@ const services = [
 			},
 		});
 
-		/* ---- Entrance once the background has turned ---- */
+		/* ---- Entrance when the background is ~85% of the way to navy ---- */
 
 		fontsReady().then(() => {
-			if (title) riseIn(title, { trigger: section, start: 'top 25%' });
-			fadeUp(list.parentElement!, { trigger: section, start: 'top 25%' }, { delay: 0.45, y: 40 });
+			if (title) riseIn(title, { trigger: section, start: 'top 18%' });
+			fadeUp(list.parentElement!, { trigger: section, start: 'top 18%' }, { delay: 0.45, y: 40 });
 		});
 	}
 </script>

@@ -1,0 +1,198 @@
+---
+/*
+ * 3D image ring beside the CTA (Figma "CTA-Carousel", 40:5340).
+ *
+ * The images sit on a circle that turns around a horizontal axis, tilted so
+ * the front image is on the left and the ones behind drift right. They always
+ * face the viewer; perspective makes the far ones smaller. Drag up or down to
+ * spin it — it carries on with momentum and settles with an image in front.
+ * Arrow keys do the same when it has focus.
+ */
+import { Image } from 'astro:assets';
+import brochure from '../assets/cta-carousel/unfolding-brochure.jpg';
+import blueDragon from '../assets/cta-carousel/blue-dragon-ad.jpg';
+import desktop from '../assets/cta-carousel/desktop-mockup.jpg';
+import bugalicious from '../assets/cta-carousel/gp-bugalicious.jpg';
+import marcoClay from '../assets/cta-carousel/marcoclay-bags.jpg';
+
+// Sizes are the frames from the Figma group
+const slides = [
+	{ image: brochure, alt: 'Unfolding brochure held open', width: 211, height: 297 },
+	{ image: blueDragon, alt: 'Blue Dragon advertisement', width: 222, height: 148 },
+	{ image: desktop, alt: 'Website shown on a desktop screen', width: 183, height: 145 },
+	{ image: bugalicious, alt: 'Green Prairie Bugalicious packaging', width: 210, height: 118 },
+	{ image: marcoClay, alt: 'MarcoClay bags on pallets', width: 274, height: 182 },
+];
+---
+
+<div
+	class="carousel"
+	data-carousel
+	data-cursor-label="Drag"
+	tabindex="0"
+	role="group"
+	aria-roledescription="carousel"
+	aria-label="Recent work. Drag up or down, or use the arrow keys, to browse."
+>
+	<div class="carousel__ring">
+		{slides.map((slide) => (
+			<div class="carousel__item" data-slide style={`width: ${slide.width}px; height: ${slide.height}px`}>
+				<Image
+					src={slide.image}
+					alt={slide.alt}
+					widths={[slide.width, slide.width * 2]}
+					sizes={`${slide.width}px`}
+					loading="lazy"
+					draggable="false"
+				/>
+			</div>
+		))}
+	</div>
+</div>
+
+<style>
+	.carousel {
+		position: relative;
+		width: 443px;
+		height: 425px;
+		perspective: 1000px;
+		cursor: grab;
+		touch-action: none;
+		user-select: none;
+		outline: none;
+	}
+
+	.carousel.is-dragging {
+		cursor: grabbing;
+	}
+
+	.carousel__ring {
+		position: absolute;
+		inset: 0;
+		transform-style: preserve-3d;
+	}
+
+	.carousel__item {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		will-change: transform;
+		backface-visibility: hidden;
+	}
+
+	.carousel__item img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		pointer-events: none;
+	}
+
+	.carousel:focus-visible {
+		outline: 1px solid var(--color-navy);
+		outline-offset: 12px;
+	}
+</style>
+
+<script>
+	import { gsap, reducedMotion } from '../scripts/motion';
+
+	const carousel = document.querySelector<HTMLElement>('[data-carousel]');
+
+	if (carousel) {
+		const slides = gsap.utils.toArray<HTMLElement>('[data-slide]', carousel);
+		const step = 360 / slides.length;
+		const radius = 175;
+		// Turns the ring about the vertical axis: front image left, far ones right
+		const tilt = (-26 * Math.PI) / 180;
+		// Nudges the ring right so the widest image clears the headline when in front
+		const offsetX = 16;
+		// Degrees of turn per pixel dragged
+		const dragRatio = 0.4;
+
+		const state = { angle: 0 };
+
+		const render = () => {
+			slides.forEach((slide, i) => {
+				const a = ((state.angle + i * step) * Math.PI) / 180;
+				const depth = radius * Math.cos(a);
+				const x = depth * Math.sin(tilt) + offsetX;
+				const y = radius * Math.sin(a);
+				const z = depth * Math.cos(tilt);
+				slide.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px)`;
+			});
+		};
+
+		const settle = (target: number, duration = 1.3) =>
+			gsap.to(state, {
+				angle: target,
+				duration: reducedMotion ? 0.3 : duration,
+				ease: 'expo.out',
+				overwrite: true,
+				onUpdate: render,
+			});
+
+		const nearest = (angle: number) => Math.round(angle / step) * step;
+
+		render();
+
+		/* ---- Drag ---- */
+
+		let dragging = false;
+		let lastY = 0;
+		let lastTime = 0;
+		let velocity = 0; // degrees per ms
+
+		carousel.addEventListener('pointerdown', (event) => {
+			dragging = true;
+			lastY = event.clientY;
+			lastTime = event.timeStamp;
+			velocity = 0;
+			gsap.killTweensOf(state);
+			carousel.setPointerCapture(event.pointerId);
+			carousel.classList.add('is-dragging');
+		});
+
+		carousel.addEventListener('pointermove', (event) => {
+			if (!dragging) return;
+			const delta = (event.clientY - lastY) * dragRatio;
+			const elapsed = Math.max(1, event.timeStamp - lastTime);
+			state.angle += delta;
+			velocity = delta / elapsed;
+			lastY = event.clientY;
+			lastTime = event.timeStamp;
+			render();
+		});
+
+		const release = () => {
+			if (!dragging) return;
+			dragging = false;
+			carousel.classList.remove('is-dragging');
+			// Carry the flick forward, then land on the nearest image
+			settle(nearest(state.angle + velocity * 300));
+		};
+
+		carousel.addEventListener('pointerup', release);
+		carousel.addEventListener('pointercancel', release);
+
+		/* ---- Keyboard ---- */
+
+		carousel.addEventListener('keydown', (event) => {
+			if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+			event.preventDefault();
+			const direction = event.key === 'ArrowUp' ? -1 : 1;
+			settle(nearest(state.angle) + direction * step, 1);
+		});
+
+		/* ---- Entrance: fades in and turns into place once ---- */
+
+		if (!reducedMotion) {
+			gsap.set(carousel, { opacity: 0 });
+			state.angle = step * 2;
+			render();
+			gsap
+				.timeline({ scrollTrigger: { trigger: carousel, start: 'top 85%', once: true } })
+				.to(carousel, { opacity: 1, duration: 1.2, ease: 'power2.out' }, 0)
+				.add(settle(0, 2.4), 0);
+		}
+	}
+</script>

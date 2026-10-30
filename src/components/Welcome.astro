@@ -19,7 +19,13 @@
 		overflow: hidden;
 	}
 
+	/*
+	 * Scales with the window. The first line is 10.83× the font size wide;
+	 * this sizes it to ~92% of the space right of the 80px margin
+	 * (~106px at 1366px wide).
+	 */
 	.welcome__text {
+		font-size: calc((100vw - 120px) / 11.8);
 		color: rgb(0 0 0 / 0.1);
 	}
 
@@ -59,7 +65,7 @@
 
 			if (drift) {
 				gsap.to(drift, {
-					x: 90,
+					x: 30,
 					ease: 'none',
 					scrollTrigger: {
 						trigger: section,
